@@ -40,7 +40,7 @@ void start (void) {
 void stop () {
 	gettimeofday(&end, NULL);
 	long long duration = (end.tv_sec-begin.tv_sec)*1000000LL + end.tv_usec-begin.tv_usec;
-	printf("%.6f seconds\n", ((float) duration) / 1000000);
+	printf(";%.3f", ((float) duration) / 1000);
 }
 
 
@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    printf("Acessos à RAM por instrução: %.3f\n", values[0]/ (float) values[1]);
+    printf("/%.3f", values[0]/ (float) values[1]);
 
 
 
