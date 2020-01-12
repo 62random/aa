@@ -68,13 +68,14 @@ void matrixMultIKJ(float * matrix_a, float * matrix_b, float * matrix_c){
     int sum;
     int i, j, k;
 
-    for( i = 0; i < SIZE; i ++)
+    for( i = 0; i < SIZE; i ++) {
+        sum = 0;
         for( k = 0; k < SIZE; k++){
-            sum = 0;
             for ( j = 0; j < SIZE; j++ )
                 sum += matrix_a[i*SIZE + k] * matrix_b[k*SIZE + j] ;
             matrix_c[i*SIZE + j]  = sum;
         }
+    }
 }
 
 
@@ -82,13 +83,14 @@ void matrixMultJKI(float * matrix_a, float * matrix_b, float * matrix_c){
     int sum;
     int i, j, k;
 
-    for( j = 0; j < SIZE; j ++)
+    for( j = 0; j < SIZE; j ++){
+        sum = 0;
         for( k = 0; k < SIZE; k++){
-            sum = 0;
             for ( i = 0; i < SIZE; i++ )
                 sum += matrix_a[i*SIZE + k] * matrix_b[k*SIZE + j] ;
             matrix_c[i*SIZE + j]  = sum;
         }
+    }
 }
 
 // Versões com transposta sem blocking
