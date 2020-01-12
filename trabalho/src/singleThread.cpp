@@ -32,16 +32,21 @@ void transpose (float ** src, int size){
 
 
 
-void createMatrix(float *** matrix, float size, int opt){
-    *(matrix) = (float **) malloc(sizeof(float) * size * size);
+float ** createMatrix(int size, int opt){
+    float ** matrix = (float **) malloc(sizeof(float *) * size);
+    for(int i = 0; i < size; i++)
+        matrix[i] = (float *) malloc(sizeof(float) * size);
+
+
     float a = 5.0;
     if (opt != 2)
-        for(int i = 0; i < size; i ++)
+        for(int i = 0; i < size; i++)
             for(int j = 0; j < size; j++)
                 if(opt == 1)
-                    (*matrix)[i][j] = 1.0;
+                    matrix[i][j] = 1.0;
                 else
-                    (*matrix)[i][j] = (float(rand())/float((RAND_MAX)) * a);
+                    matrix[i][j] = (float(rand())/float((RAND_MAX)) * a);
+    return matrix;
 }
 
 // Versões originais
@@ -136,15 +141,16 @@ int main(int argc, char *argv[]) {
     float **matrix_a, **matrix_b, **matrix_c;
     float **matrix_aa, **matrix_bb, **matrix_cc;
     int size = atoi(argv[1]);
-    createMatrix(&matrix_a, size, RANDOM_GEN);
-    createMatrix(&matrix_b, size, ALL_1);
-    createMatrix(&matrix_c, size, ONLY_ALLOC);
+
+    matrix_a = createMatrix(size, RANDOM_GEN);
+    matrix_b = createMatrix(size, ALL_1);
+    matrix_c = createMatrix(size, ONLY_ALLOC);
 
     matrixMultIJK(matrix_a, matrix_b, matrix_c, size);
 
-    createMatrix(&matrix_aa, size, RANDOM_GEN);
-    createMatrix(&matrix_bb, size, ALL_1);
-    createMatrix(&matrix_cc, size, ONLY_ALLOC);
+    matrix_aa = createMatrix(size, RANDOM_GEN);
+    matrix_bb = createMatrix(size, ALL_1);
+    matrix_cc = createMatrix(size, ONLY_ALLOC);
 
     for (int i = 0; i < size; i++)
         for(int j = 0; j < 0; j++)
