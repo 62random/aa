@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <papi.h>
-#include <string.h>
 #include <sys/time.h>
 
 // Variáveis e defines relacionados com a PAPI
@@ -82,8 +81,8 @@ float * createMatrix(int opt){
                 if(opt == 1)
                     matrix[i*SIZE + j]  = 1.0;
                 else
-                    matrix[i*SIZE + j]  = (float) sin(i+j);
-                    //matrix[i*SIZE + j]  = (float(rand())/float((RAND_MAX)) * a);
+                    //matrix[i*SIZE + j]  = (float) sin(i+j);
+                    matrix[i*SIZE + j]  = (float(rand())/float((RAND_MAX)) * a);
     return matrix;
 }
 
@@ -210,7 +209,7 @@ int main(int argc, char *argv[]) {
     float *matrix_a, *matrix_b, *matrix_c;
     float *matrix_aa, *matrix_bb, *matrix_cc;
     SIZE = atoi(argv[2]);
-    char * imp = strdup(argv[1]);
+    int imp = atoi(argv[1]);
 
     matrix_a = createMatrix(RANDOM_GEN);
     matrix_b = createMatrix(ALL_1);
@@ -220,22 +219,22 @@ int main(int argc, char *argv[]) {
     matrix_cc = createMatrix(ONLY_ALLOC);
 
 
-    if(!strcmp(imp, "ijk")) {
+    if(imp == 1) {
         matrixMultIJK(matrix_a, matrix_b, matrix_c);
     }
-    else if(!strcmp(imp, "ikj")) {
+    else if(imp == 2) {
         matrixMultIJK(matrix_a, matrix_b, matrix_c);
     }
-    else if(!strcmp(imp, "jki")) {
+    else if(imp == 3) {
         matrixMultIJK(matrix_a, matrix_b, matrix_c);
     }
-    else if(!strcmp(imp, "ijk_t")) {
+    else if(imp == 4) {
         matrixMultIJK_transpose(matrix_a, matrix_b, matrix_c);
     }
-    else if(!strcmp(imp, "ikj_t")) {
+    else if(imp == 5) {
         matrixMultIKJ_transpose(matrix_a, matrix_b, matrix_c);
     }
-    else if(!strcmp(imp, "jki_t")) {
+    else if(imp == 6) {
         matrixMultJKI_transpose(matrix_a, matrix_b, matrix_c);
     }
     else {
