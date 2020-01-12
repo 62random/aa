@@ -6,131 +6,130 @@
 #define 			ONLY_ALLOC			2
 #define				BLOCK_SIZE			64
 
-void blockingTranspose(float ** src, int size) {
+int SIZE;
+
+void blockingTranspose(float * src, int SIZE) {
     int temp;
-    for (int ii = 0; ii < size; ii += BLOCK_SIZE)
-        for (int jj = 0; jj < size; jj += BLOCK_SIZE)
+    for (int ii = 0; ii < SIZE; ii += BLOCK_SIZE)
+        for (int jj = 0; jj < SIZE; jj += BLOCK_SIZE)
             for (int i = ii; i < ii + BLOCK_SIZE; i++)
                 for (int j = jj + i + 1; j < jj + BLOCK_SIZE; j++)
                 {
-                    temp = src[i][j];
-                    src[i][j] = src[j][i];
-                    src[j][i] = temp;
+                    temp = src[i*SIZE + j] ;
+                    src[i*SIZE + j]  = src[j*SIZE + i] ;
+                    src[j*SIZE + i]  = temp;
                 }
 }
 
-void transpose (float ** src, int size){
+void transpose (float * src, int SIZE){
     float tmp;
-    for(int i = 0; i < size; i ++)
-        for(int j = i + 1; j < size; j++)
+    for(int i = 0; i < SIZE; i ++)
+        for(int j = i + 1; j < SIZE; j++)
         {
-            tmp = src[i][j];
-            src[i][j] = src[j][i];
-            src[j][i] = tmp;
+            tmp = src[i*SIZE + j] ;
+            src[i*SIZE + j]  = src[j*SIZE + i] ;
+            src[j*SIZE + i]  = tmp;
         }
 }
 
 
 
-float ** createMatrix(int size, int opt){
-    float ** matrix = (float **) malloc(sizeof(float *) * size);
-    for(int i = 0; i < size; i++)
-        matrix[i] = (float *) malloc(sizeof(float) * size);
-
+float * createMatrix(int opt){
+    float * matrix = (float *) malloc(sizeof(float) * SIZE * SIZE);
 
     float a = 5.0;
     if (opt != 2)
-        for(int i = 0; i < size; i++)
-            for(int j = 0; j < size; j++)
+        for(int i = 0; i < SIZE; i++)
+            for(int j = 0; j < SIZE; j++)
                 if(opt == 1)
-                    matrix[i][j] = 1.0;
+                    matrix[i*SIZE + j]  = 1.0;
                 else
-                    matrix[i][j] = (float(rand())/float((RAND_MAX)) * a);
+                    matrix[i*SIZE + j]  = (float(rand())/float((RAND_MAX)) * a);
     return matrix;
 }
 
 // Versões originais
 
-void matrixMultIJK(float** matrix_a, float** matrix_b, float** matrix_c, int size){
+void matrixMultIJK(float * matrix_a, float * matrix_b, float * matrix_c, int SIZE){
     int sum;
     int i, j, k;
 
-    for( i = 0; i < size; i ++)
-        for( j = 0; j < size; j++){
+    for( i = 0; i < SIZE; i ++)
+        for( j = 0; j < SIZE; j++){
             sum = 0;
-            for ( k = 0; k < size; k++ )
-                sum += matrix_a[i][k] * matrix_b[k][j];
-            matrix_c[i][j] = sum;
+            for ( k = 0; k < SIZE; k++ )
+                sum += matrix_a[i*SIZE + k] * matrix_b[k*SIZE + j] ;
+            matrix_c[i*SIZE + j]  = sum;
         }
 }
 
-void matrixMultIKJ(float** matrix_a, float** matrix_b, float** matrix_c, int size){
+void matrixMultIKJ(float * matrix_a, float * matrix_b, float * matrix_c, int SIZE){
     int sum;
     int i, j, k;
 
-    for( i = 0; i < size; i ++)
-        for( k = 0; k < size; k++){
+    for( i = 0; i < SIZE; i ++)
+        for( k = 0; k < SIZE; k++){
             sum = 0;
-            for ( j = 0; j < size; j++ )
-                sum += matrix_a[i][k] * matrix_b[k][j];
-            matrix_c[i][j] = sum;
+            for ( j = 0; j < SIZE; j++ )
+                sum += matrix_a[i*SIZE + k] * matrix_b[k*SIZE + j] ;
+            matrix_c[i*SIZE + j]  = sum;
         }
 }
 
 
-void matrixMultJKI(float** matrix_a, float** matrix_b, float** matrix_c, int size){
+void matrixMultJKI(float * matrix_a, float * matrix_b, float * matrix_c, int SIZE){
     int sum;
     int i, j, k;
 
-    for( j = 0; j < size; j ++)
-        for( k = 0; k < size; k++){
+    for( j = 0; j < SIZE; j ++)
+        for( k = 0; k < SIZE; k++){
             sum = 0;
-            for ( i = 0; i < size; i++ )
-                sum += matrix_a[i][k] * matrix_b[k][j];
-            matrix_c[i][j] = sum;
+            for ( i = 0; i < SIZE; i++ )
+                sum += matrix_a[i*SIZE + k] * matrix_b[k*SIZE + j] ;
+            matrix_c[i*SIZE + j]  = sum;
         }
 }
 
 // Versões com transposta sem blocking
 
-void matrixMultIJK_transpose(float** matrix_a, float** matrix_b, float** matrix_c, int size){
+void matrixMultIJK_transpose(float * matrix_a, float * matrix_b, float * matrix_c, int SIZE){
     int sum;
     int i, j, k;
 
-    transpose(matrix_b, size);
-    for( i = 0; i < size; i ++)
-        for( j = 0; j < size; j++){
+    transpose(matrix_b, SIZE);
+    for( i = 0; i < SIZE; i ++)
+        for( j = 0; j < SIZE; j++){
             sum = 0;
-            for ( k = 0; k < size; k++ )
-                sum += matrix_a[i][k] * matrix_b[j][k];
-            matrix_c[i][j] = sum;
+            for ( k = 0; k < SIZE; k++ )
+                sum += matrix_a[i*SIZE + k] * matrix_b[j*SIZE + k];
+            matrix_c[i*SIZE + j]  = sum;
         }
 }
 
-void matrixMultIKJ_transpose(float** matrix_a, float** matrix_b, float** matrix_c, int size){
+void matrixMultIKJ_transpose(float * matrix_a, float * matrix_b, float * matrix_c, int SIZE){
     int sum;
     int i, j, k;
-    for( i = 0; i < size; i ++)
-        for( k = 0; k < size; k++){
+    for( i = 0; i < SIZE; i ++)
+        for( k = 0; k < SIZE; k++){
             sum = 0;
-            for ( j = 0; j < size; j++ )
-                sum += matrix_a[i][k] * matrix_b[k][j];
-            matrix_c[i][j] = sum;
+            for ( j = 0; j < SIZE; j++ )
+                sum += matrix_a[i*SIZE + k] * matrix_b[k*SIZE + j] ;
+            matrix_c[i*SIZE + j]  = sum;
         }
 }
 
 
-void matrixMultJKI_transpose(float** matrix_a, float** matrix_b, float** matrix_c, int size){
+void matrixMultJKI_transpose(float * matrix_a, float * matrix_b, float * matrix_c, int SIZE){
     int sum;
 
     int i, j, k;
-    transpose(matrix_a, size);
-    for( j = 0; j < size; j ++)
-        for( k = 0; k < size; k++){
+    transpose(matrix_a, SIZE);
+    for( j = 0; j < SIZE; j ++)
+        for( k = 0; k < SIZE; k++){
             sum = 0;
-            for ( i = 0; i < size; i++ )
-                sum += matrix_a[k][i] * matrix_b[k][j];
-            matrix_c[i][j] = sum;
+            for ( i = 0; i < SIZE; i++ )
+                sum += matrix_a[k*SIZE + i]  * matrix_b[k*SIZE + j] ;
+            matrix_c[i*SIZE + j]  = sum;
         }
 }
 
@@ -138,30 +137,29 @@ void matrixMultJKI_transpose(float** matrix_a, float** matrix_b, float** matrix_
 // Main
 
 int main(int argc, char *argv[]) {
-    float **matrix_a, **matrix_b, **matrix_c;
-    float **matrix_aa, **matrix_bb, **matrix_cc;
-    int size = atoi(argv[1]);
+    float *matrix_a, *matrix_b, *matrix_c, *matrix_cc;
+    SIZE = atoi(argv[1]);
 
-    matrix_a = createMatrix(size, RANDOM_GEN);
-    matrix_b = createMatrix(size, ALL_1);
-    matrix_c = createMatrix(size, ONLY_ALLOC);
+    matrix_a = createMatrix( RANDOM_GEN);
+    matrix_b = createMatrix( ALL_1);
+    matrix_c = createMatrix( ONLY_ALLOC);
 
-    matrixMultIJK(matrix_a, matrix_b, matrix_c, size);
+    matrixMultIJK(matrix_a, matrix_b, matrix_c, SIZE);
 
-    matrix_aa = createMatrix(size, RANDOM_GEN);
-    matrix_bb = createMatrix(size, ALL_1);
-    matrix_cc = createMatrix(size, ONLY_ALLOC);
+    matrix_cc = createMatrix( ONLY_ALLOC);
 
-    for (int i = 0; i < size; i++)
-        for(int j = 0; j < 0; j++)
-            if( matrix_c[i][j] != matrix_cc[i][j])
+    matrixMultJKI(matrix_a, matrix_b, matrix_cc, SIZE);
+
+    for (int i = 0; i < SIZE; i++)
+        for(int j = 0; j < SIZE; j++)
+            if( matrix_c[i*SIZE + j]  != matrix_cc[i*SIZE + j] )
                 printf("Erro\n");
 
     free(matrix_a);
     free(matrix_b);
     free(matrix_c);
-    free(matrix_aa);
-    free(matrix_bb);
     free(matrix_cc);
+
+    printf("Finalmente caralho\n");
     return 0;
 }
