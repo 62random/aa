@@ -1,7 +1,7 @@
 module load gcc/4.9.0
 module load papi/5.5.0
-
-export OMP_NUM_THREADS=24
+module load cuda/7.0.28
+export CUDA=yes
 
 make
 echo "impl;1;2;3"
@@ -12,7 +12,7 @@ do
         echo -n  $imp
         for i in $(seq 1 3)
         do
-            ./bin/singleBlocking $imp $tamanho
+            ./bin/cuda $imp $tamanho
         done
         echo ""
     done
