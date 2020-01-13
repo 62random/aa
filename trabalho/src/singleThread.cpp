@@ -180,6 +180,7 @@ void matrixMultJKI_transpose(float * matrix_a, float * matrix_b, float * matrix_
     retval = PAPI_start(EventSet);
     int i, j, k;
     transpose(matrix_a);
+	transpose(matrix_b);
     for( j = 0; j < SIZE; j ++)
         for( k = 0; k < SIZE; k++){
             for ( i = 0; i < SIZE; i++ )
@@ -242,7 +243,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    printf("/%.6f", values[0]/ (float) values[1]);
+    printf("/%.9f", values[0]/ (float) values[1]);
 
 
 

@@ -154,9 +154,9 @@ void matrixMultIJK_transpose(float * matrix_a, float * matrix_b, float * matrix_
 	for(bi = 0; bi < SIZE; bi+= BLOCK_SIZE)
 		for(bj = 0; bj < SIZE; bj+= BLOCK_SIZE)
 			for(bk = 0; bk < SIZE; bk+= BLOCK_SIZE)
-			    for( i = 0; i < SIZE; i ++)
-			        for( j = 0; j < SIZE; j++)
-			            for ( k = 0; k < SIZE; k++ )
+			    for( i = 0; i < BLOCK_SIZE; i ++)
+			        for( j = 0; j < BLOCK_SIZE; j++)
+			            for ( k = 0; k < BLOCK_SIZE; k++ )
 			                matrix_c[(bi + i)*SIZE + (bj + j)] += matrix_a[(bi + i)*SIZE + (bk + k)] * matrix_b[(bj + j)*SIZE + (bk + k)];
 
     retval = PAPI_stop(EventSet, values);
@@ -170,9 +170,9 @@ void matrixMultIKJ_transpose(float * matrix_a, float * matrix_b, float * matrix_
 	for(bi = 0; bi < SIZE; bi+= BLOCK_SIZE)
 		for(bj = 0; bj < SIZE; bj+= BLOCK_SIZE)
 			for(bk = 0; bk < SIZE; bk+= BLOCK_SIZE)
-			    for( i = 0; i < SIZE; i ++)
-			        for( k = 0; k < SIZE; k++)
-			            for ( j = 0; j < SIZE; j++ )
+			    for( i = 0; i < BLOCK_SIZE; i ++)
+			        for( k = 0; k < BLOCK_SIZE; k++)
+			            for ( j = 0; j < BLOCK_SIZE; j++ )
 			                matrix_c[(bi + i)*SIZE + (bj + j)] += matrix_a[(bi + i)*SIZE + (bk + k)] * matrix_b[(bk + k)*SIZE + (bj + j)];
 
 
