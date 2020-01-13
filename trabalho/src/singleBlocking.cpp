@@ -234,10 +234,10 @@ int main(int argc, char *argv[]) {
         matrixMultIJK(matrix_a, matrix_b, matrix_c);
     }
     else if(imp == 2) {
-        matrixMultIJK(matrix_a, matrix_b, matrix_c);
+        matrixMultIKJ(matrix_a, matrix_b, matrix_c);
     }
     else if(imp == 3) {
-        matrixMultIJK(matrix_a, matrix_b, matrix_c);
+        matrixMultJKI(matrix_a, matrix_b, matrix_c);
     }
     else if(imp == 4) {
         matrixMultIJK_transpose(matrix_a, matrix_b, matrix_c);
