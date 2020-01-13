@@ -3,6 +3,7 @@
 #include <math.h>
 #include <papi.h>
 #include <sys/time.h>
+#include <omp.h>
 
 // Variáveis e defines relacionados com a PAPI
 #define             NUM_EVENTS          2
@@ -110,9 +111,10 @@ void matrixMultIKJ(float * __restrict__ matrix_a, float * __restrict__ matrix_b,
     start();
     retval = PAPI_start(EventSet);
     int i, j, k, bi, bj, bk;
-  	for(bi = 0; bi < SIZE; bi+= BLOCK_SIZE)
-		for(bj = 0; bj < SIZE; bj+= BLOCK_SIZE)
-			for(bk = 0; bk < SIZE; bk+= BLOCK_SIZE)
+		#pragma omp parallel for collapse(3) private(i,j,k,bi,bj,bk)
+		for(bi = 0; bi < SIZE; bi+= BLOCK_SIZE)
+				for(bj = 0; bj < SIZE; bj+= BLOCK_SIZE)
+						for(bk = 0; bk < SIZE; bk+= BLOCK_SIZE)
                 for( i = 0; i < BLOCK_SIZE; i ++)
                     for( k = 0; k < BLOCK_SIZE; k++)
                         for ( j = 0; j < BLOCK_SIZE; j++)
