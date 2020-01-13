@@ -12,7 +12,7 @@ OUTPUT2=$(BIN_DIR)/singleBlocking
 SOURCE1= $(SOURCE_DIR)/singleThread.cpp
 SOURCE2= $(SOURCE_DIR)/singleBlocking.cpp
 
-CFLAGS= -O3 -fopt-info-optall -Wall -Wextra -std=c++11 -lm -g -lpapi -flto-report $(PAPI_LIB) $(PAPI_INCLUDE) -lpthread
+CFLAGS= -O3 -fopt-info-optimized -fopenmp -Wall -Wextra -lm -g -lpapi -flto-report $(PAPI_LIB) $(PAPI_INCLUDE) -lpthread
 
 MKDIR= mkdir -p
 
