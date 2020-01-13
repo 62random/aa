@@ -14,7 +14,7 @@ long long int values[NUM_EVENTS];
 #define 			RANDOM_GEN 			0
 #define 			ALL_1				1
 #define 			ONLY_ALLOC			2
-#define				BLOCK_SIZE			64
+#define				BLOCK_SIZE			32
 
 int SIZE;
 
@@ -91,16 +91,15 @@ float * createMatrix(int opt){
 void matrixMultIJK(float * matrix_a, float * matrix_b, float * matrix_c){
     start();
     retval = PAPI_start(EventSet);
-    float sum;
-    int i, j, k;
+    int i, j, k, bi, bj, bk;
 
-    for( i = 0; i < SIZE; i ++)
-        for( j = 0; j < SIZE; j++){
-            sum = 0;
-            for ( k = 0; k < SIZE; k++ )
-                sum += matrix_a[i*SIZE + k] * matrix_b[k*SIZE + j] ;
-            matrix_c[i*SIZE + j] = sum;
-        }
+	for(bi = 0; bi < SIZE; bi+= BLOCK_SIZE)
+		for(bj = 0; bj < SIZE; bj+= BLOCK_SIZE)
+			for(bk = 0; bk < SIZE; bk+= BLOCK_SIZE)
+                for( i = 0; i < BLOCK_SIZE; i ++)
+                    for( j = 0; j < BLOCK_SIZE; j++)
+                        for ( k = 0; k < BLOCK_SIZE; k++ )
+                            matrix_c[(bi+i)*SIZE + (bj+j)] += matrix_a[(bi+i)*SIZE + (bk+k)] * matrix_b[(bk+k)*SIZE + (bj+j)] ;
 
     retval = PAPI_stop(EventSet, values);
     stop();
@@ -109,14 +108,16 @@ void matrixMultIJK(float * matrix_a, float * matrix_b, float * matrix_c){
 void matrixMultIKJ(float * matrix_a, float * matrix_b, float * matrix_c){
     start();
     retval = PAPI_start(EventSet);
-    int i, j, k;
+    int i, j, k, bi, bj, bk;
+  	for(bi = 0; bi < SIZE; bi+= BLOCK_SIZE)
+		for(bj = 0; bj < SIZE; bj+= BLOCK_SIZE)
+			for(bk = 0; bk < SIZE; bk+= BLOCK_SIZE)
+                for( i = 0; i < BLOCK_SIZE; i ++)
+                    for( k = 0; k < BLOCK_SIZE; k++)
+                        for ( j = 0; j < BLOCK_SIZE; j++)
+                            matrix_c[(bi+ i)*SIZE + (bj + j)] += matrix_a[(bi+ i)*SIZE + (bk + k)] * matrix_b[(bk + k)*SIZE + (bj + j)];
 
-    for( i = 0; i < SIZE; i ++) {
-        for( k = 0; k < SIZE; k++){
-            for ( j = 0; j < SIZE; j++ )
-                matrix_c[i*SIZE + j] += matrix_a[i*SIZE + k] * matrix_b[k*SIZE + j] ;
-        }
-    }
+
 
     retval = PAPI_stop(EventSet, values);
     stop();
@@ -126,14 +127,17 @@ void matrixMultIKJ(float * matrix_a, float * matrix_b, float * matrix_c){
 void matrixMultJKI(float * matrix_a, float * matrix_b, float * matrix_c){
     start();
     retval = PAPI_start(EventSet);
-    int i, j, k;
+    int i, j, k, bi, bk, bj;
 
-    for( j = 0; j < SIZE; j++){
-        for( k = 0; k < SIZE; k++){
-            for ( i = 0; i < SIZE; i++ )
-                matrix_c[i*SIZE + j] += matrix_a[i*SIZE + k] * matrix_b[k*SIZE + j] ;
-        }
-    }
+  	for(bi = 0; bi < SIZE; bi+= BLOCK_SIZE)
+		for(bj = 0; bj < SIZE; bj+= BLOCK_SIZE)
+			for(bk = 0; bk < BLOCK_SIZE; bk+= BLOCK_SIZE)
+              for( j = 0; j < BLOCK_SIZE; j++)
+                  for( k = 0; k < BLOCK_SIZE; k++)
+                      for ( i = 0; i < BLOCK_SIZE; i++)
+                          matrix_c[(bi + i)*SIZE + (bj + j)] += matrix_a[(bi + i)*SIZE + (bk +k)] * matrix_b[(bk +k)*SIZE + (bj + j)];
+
+
 
     retval = PAPI_stop(EventSet, values);
     stop();
@@ -144,17 +148,16 @@ void matrixMultJKI(float * matrix_a, float * matrix_b, float * matrix_c){
 void matrixMultIJK_transpose(float * matrix_a, float * matrix_b, float * matrix_c){
     start();
     retval = PAPI_start(EventSet);
-    float sum;
-    int i, j, k;
+    int i, j, k, bi, bj , bk;
 
-    transpose(matrix_b);
-    for( i = 0; i < SIZE; i ++)
-        for( j = 0; j < SIZE; j++){
-            sum = 0;
-            for ( k = 0; k < SIZE; k++ )
-                sum += matrix_a[i*SIZE + k] * matrix_b[j*SIZE + k];
-            matrix_c[i*SIZE + j] = sum;
-        }
+    blockingTranspose(matrix_b);
+	for(bi = 0; bi < SIZE; bi+= BLOCK_SIZE)
+		for(bj = 0; bj < SIZE; bj+= BLOCK_SIZE)
+			for(bk = 0; bk < SIZE; bk+= BLOCK_SIZE)
+			    for( i = 0; i < SIZE; i ++)
+			        for( j = 0; j < SIZE; j++)
+			            for ( k = 0; k < SIZE; k++ )
+			                matrix_c[(bi + i)*SIZE + (bj + j)] += matrix_a[(bi + i)*SIZE + (bk + k)] * matrix_b[(bj + j)*SIZE + (bk + k)];
 
     retval = PAPI_stop(EventSet, values);
     stop();
@@ -163,12 +166,15 @@ void matrixMultIJK_transpose(float * matrix_a, float * matrix_b, float * matrix_
 void matrixMultIKJ_transpose(float * matrix_a, float * matrix_b, float * matrix_c){
     start();
     retval = PAPI_start(EventSet);
-    int i, j, k;
-    for( i = 0; i < SIZE; i ++)
-        for( k = 0; k < SIZE; k++){
-            for ( j = 0; j < SIZE; j++ )
-                matrix_c[i*SIZE + j] += matrix_a[i*SIZE + k] * matrix_b[k*SIZE + j];
-        }
+    int i, j, k, bi, bj, bk;
+	for(bi = 0; bi < SIZE; bi+= BLOCK_SIZE)
+		for(bj = 0; bj < SIZE; bj+= BLOCK_SIZE)
+			for(bk = 0; bk < SIZE; bk+= BLOCK_SIZE)
+			    for( i = 0; i < SIZE; i ++)
+			        for( k = 0; k < SIZE; k++)
+			            for ( j = 0; j < SIZE; j++ )
+			                matrix_c[(bi + i)*SIZE + (bj + j)] += matrix_a[(bi + i)*SIZE + (bk + k)] * matrix_b[(bk + k)*SIZE + (bj + j)];
+
 
     retval = PAPI_stop(EventSet, values);
     stop();
@@ -179,12 +185,17 @@ void matrixMultJKI_transpose(float * matrix_a, float * matrix_b, float * matrix_
     start();
     retval = PAPI_start(EventSet);
     int i, j, k;
-    transpose(matrix_a);
-    for( j = 0; j < SIZE; j ++)
-        for( k = 0; k < SIZE; k++){
-            for ( i = 0; i < SIZE; i++ )
-                matrix_c[i*SIZE + j] += matrix_a[k*SIZE + i]  * matrix_b[k*SIZE + j];
-        }
+  	int bi, bj, bk;
+    blockingTranspose(matrix_a);
+  	blockingTranspose(matrix_b);
+	for(bi = 0; bi < SIZE; bi+= BLOCK_SIZE)
+		for(bj = 0; bj < SIZE; bj+= BLOCK_SIZE)
+			for(bk = 0; bk < SIZE; bk+= BLOCK_SIZE)
+                for( j = 0; j < BLOCK_SIZE; j ++)
+                    for( k = 0; k < BLOCK_SIZE; k++){
+                        for ( i = 0; i < BLOCK_SIZE; i++ )
+                            matrix_c[(bi + i)*SIZE + (bj + j)] += matrix_a[(bk + k)*SIZE + (bi + i)]  * matrix_b[(bj + j)*SIZE + (bk + k)];
+                    }
 
     retval = PAPI_stop(EventSet, values);
     stop();
