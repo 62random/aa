@@ -12,11 +12,11 @@ OUTPUT2=$(BIN_DIR)/singleBlocking
 SOURCE1= $(SOURCE_DIR)/singleThread.cpp
 SOURCE2= $(SOURCE_DIR)/singleBlocking.cpp
 
-CFLAGS= -O3 -Wall -Wextra -std=c++11 -lm -g -lpapi -flto-report $(PAPI_LIB) $(PAPI_INCLUDE) -lpthread
+CFLAGS= -O3 -fopt-info-all -Wall -Wextra -std=c++11 -lm -g -lpapi -flto-report $(PAPI_LIB) $(PAPI_INCLUDE) -lpthread
 
 MKDIR= mkdir -p
 
-all: $(OUTPUT1) $(OUTPUT2)
+all:  $(OUTPUT2) #$(OUTPUT1)
 
 $(OUTPUT1):  $(SOURCE1)
 	    $(MKDIR) $(BIN_DIR)
@@ -28,4 +28,5 @@ $(OUTPUT2):  $(SOURCE2)
 
 .PHONY: clean
 clean:
-	rm -f $(OUTPUT1)
+	#rm -f $(OUTPUT1)
+	rm -f $(OUTPUT2)

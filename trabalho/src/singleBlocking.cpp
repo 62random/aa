@@ -75,7 +75,7 @@ float * createMatrix(int opt){
     float * matrix = (float *) malloc(sizeof(float) * SIZE * SIZE);
 
     float a = 5.0;
-    if (opt != 2)
+    if(opt != 2) {
         for(int i = 0; i < SIZE; i++)
             for(int j = 0; j < SIZE; j++)
                 if(opt == 1)
@@ -83,12 +83,13 @@ float * createMatrix(int opt){
                 else
                     //matrix[i*SIZE + j]  = (float) sin(i+j);
                     matrix[i*SIZE + j]  = (float(rand())/float((RAND_MAX)) * a);
-    return matrix;
+	}
+	return matrix;
 }
 
 // Versões originais
 
-void matrixMultIJK(float * matrix_a, float * matrix_b, float * matrix_c){
+void matrixMultIJK(float * __restrict__ matrix_a, float * __restrict__ matrix_b, float * __restrict__ matrix_c){
     start();
     retval = PAPI_start(EventSet);
     int i, j, k, bi, bj, bk;
@@ -105,7 +106,7 @@ void matrixMultIJK(float * matrix_a, float * matrix_b, float * matrix_c){
     stop();
 }
 
-void matrixMultIKJ(float * matrix_a, float * matrix_b, float * matrix_c){
+void matrixMultIKJ(float * __restrict__ matrix_a, float * __restrict__ matrix_b, float * __restrict__ matrix_c){
     start();
     retval = PAPI_start(EventSet);
     int i, j, k, bi, bj, bk;
@@ -124,14 +125,14 @@ void matrixMultIKJ(float * matrix_a, float * matrix_b, float * matrix_c){
 }
 
 
-void matrixMultJKI(float * matrix_a, float * matrix_b, float * matrix_c){
+void matrixMultJKI(float * __restrict__ matrix_a, float * __restrict__ matrix_b, float * __restrict__ matrix_c){
     start();
     retval = PAPI_start(EventSet);
     int i, j, k, bi, bk, bj;
 
   	for(bi = 0; bi < SIZE; bi+= BLOCK_SIZE)
 		for(bj = 0; bj < SIZE; bj+= BLOCK_SIZE)
-			for(bk = 0; bk < BLOCK_SIZE; bk+= BLOCK_SIZE)
+			for(bk = 0; bk < SIZE; bk+= BLOCK_SIZE)
               for( j = 0; j < BLOCK_SIZE; j++)
                   for( k = 0; k < BLOCK_SIZE; k++)
                       for ( i = 0; i < BLOCK_SIZE; i++)
@@ -145,7 +146,7 @@ void matrixMultJKI(float * matrix_a, float * matrix_b, float * matrix_c){
 
 // Versões com transposta sem blocking
 
-void matrixMultIJK_transpose(float * matrix_a, float * matrix_b, float * matrix_c){
+void matrixMultIJK_transpose(float * __restrict__ matrix_a, float * __restrict__ matrix_b, float * __restrict__ matrix_c){
     start();
     retval = PAPI_start(EventSet);
     int i, j, k, bi, bj , bk;
@@ -163,7 +164,7 @@ void matrixMultIJK_transpose(float * matrix_a, float * matrix_b, float * matrix_
     stop();
 }
 
-void matrixMultIKJ_transpose(float * matrix_a, float * matrix_b, float * matrix_c){
+void matrixMultIKJ_transpose(float * __restrict__ matrix_a, float * __restrict__ matrix_b, float * __restrict__ matrix_c){
     start();
     retval = PAPI_start(EventSet);
     int i, j, k, bi, bj, bk;
@@ -181,7 +182,7 @@ void matrixMultIKJ_transpose(float * matrix_a, float * matrix_b, float * matrix_
 }
 
 
-void matrixMultJKI_transpose(float * matrix_a, float * matrix_b, float * matrix_c){
+void matrixMultJKI_transpose(float * __restrict__ matrix_a, float * __restrict__ matrix_b, float * __restrict__ matrix_c){
     start();
     retval = PAPI_start(EventSet);
     int i, j, k;
@@ -253,7 +254,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    printf("/%.6f", values[0]/ (float) values[1]);
+    printf("/%.9f", values[0]/ (float) values[1]);
 
 
 

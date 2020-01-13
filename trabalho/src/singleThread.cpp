@@ -75,7 +75,7 @@ float * createMatrix(int opt){
     float * matrix = (float *) malloc(sizeof(float) * SIZE * SIZE);
 
     float a = 5.0;
-    if (opt != 2)
+    if(opt != 2) {
         for(int i = 0; i < SIZE; i++)
             for(int j = 0; j < SIZE; j++)
                 if(opt == 1)
@@ -83,7 +83,8 @@ float * createMatrix(int opt){
                 else
                     //matrix[i*SIZE + j]  = (float) sin(i+j);
                     matrix[i*SIZE + j]  = (float(rand())/float((RAND_MAX)) * a);
-    return matrix;
+	}
+	return matrix;
 }
 
 // Versões originais
