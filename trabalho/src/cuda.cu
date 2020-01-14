@@ -1,15 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <papi.h>
 #include <sys/time.h>
 #include <omp.h>
-
-// Variáveis e defines relacionados com a PAPI
-#define             NUM_EVENTS          2
-int	Events[NUM_EVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS};
-int EventSet = PAPI_NULL, retval;
-long long int values[NUM_EVENTS];
 
 
 #define 			RANDOM_GEN 			0
@@ -40,7 +33,7 @@ void start (void) {
 void stop () {
 	gettimeofday(&end, NULL);
 	long long duration = (end.tv_sec-begin.tv_sec)*1000000LL + end.tv_usec-begin.tv_usec;
-	printf(";%.3f", ((float) duration) / 1000);
+	//printf(";%lld", duration );
 }
 
 
@@ -82,20 +75,20 @@ float * createMatrix(int opt){
                 if(opt == 1)
                     matrix[i*SIZE + j]  = 1.0;
                 else
-                    //matrix[i*SIZE + j]  = (float) sin(i+j);
-                    matrix[i*SIZE + j]  = (float(rand())/float((RAND_MAX)) * a);
+                    matrix[i*SIZE + j]  = (float) sin(i+j);
+                    //matrix[i*SIZE + j]  = (float(rand())/float((RAND_MAX)) * a);
 	}
 	return matrix;
 }
 
 // Versões cuda
 
-__global__ void cudaKernel (float *Da, float *Db, float *Dc, intSIZE) {
+__global__ void cudaKernel (float *Da, float *Db, float *Dc, int SIZE) {
   int COL = threadIdx.x + blockDim.x * blockIdx.x;
   int ROW = threadIdx.y + blockDim.y * blockIdx.y;
   int k;
 
-  if (ROW>=SIZE || COL>=v){
+  if (ROW>=SIZE || COL>=SIZE){
     float res=0.0f;
     for(k=0; k<SIZE; ++k){
       res += Da[ROW*SIZE + k] * Db[k*SIZE + COL];
@@ -104,7 +97,8 @@ __global__ void cudaKernel (float *Da, float *Db, float *Dc, intSIZE) {
   }
 }
 
-void no_blocking(float*a, float*b, float*c, intSIZE) {
+void no_block(float*a, float*b, float*c, int SIZE) {
+  start();
   float *Da, *Db, *Dc;
   cudaMalloc( (void**) &Da,SIZE *SIZE *sizeof(float) );
   cudaMalloc( (void**) &Db,SIZE *SIZE *sizeof(float) );
@@ -122,10 +116,11 @@ void no_blocking(float*a, float*b, float*c, intSIZE) {
   cudaFree(Da);
   cudaFree(Db);
   cudaFree(Dc);
+  stop();
 }
 
 
-__global__ void cudaBlockKernel(float *a, float *b, float *c, intSIZE){
+__global__ void cudaBlockKernel(float *a, float *b, float *c, int SIZE){
   float CValue = 0;
 
   int Row = blockIdx.y*BLOCK_SIZE + threadIdx.y;
@@ -142,7 +137,7 @@ __global__ void cudaBlockKernel(float *a, float *b, float *c, intSIZE){
       As[threadIdx.y][threadIdx.x] = 0.0;
 
     if (k*BLOCK_SIZE + threadIdx.y <SIZE && Col <SIZE)
-      Bs[threadIdx.y][threadIdx.x] = b[(k*BLOCK_SIZE + threadIdx.y)*N + Col];
+      Bs[threadIdx.y][threadIdx.x] = b[(k*BLOCK_SIZE + threadIdx.y)*SIZE + Col];
     else
       Bs[threadIdx.y][threadIdx.x] = 0.0;
 
@@ -155,11 +150,12 @@ __global__ void cudaBlockKernel(float *a, float *b, float *c, intSIZE){
   }
 
   if (Row < SIZE && Col < SIZE)
-    c[((blockIdx.y * blockDim.y + threadIdx.y)*N) +
+    c[((blockIdx.y * blockDim.y + threadIdx.y)*SIZE) +
       (blockIdx.x * blockDim.x)+ threadIdx.x] = CValue;
 }
 
-void w_blocking(float*a, float*b, float*c, int N) {
+void w_block(float*a, float*b, float*c, int SIZE) {
+  start();
   float *Da, *Db, *Dc;
 
   size_t size = SIZE * SIZE * sizeof(float);
@@ -173,7 +169,7 @@ void w_blocking(float*a, float*b, float*c, int N) {
   cudaMalloc(&Dc, size);
 
   dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-  dim3 dimGrid((N + dimBlock.x -1) / dimBlock.x, (SIZE + dimBlock.y -1 )/ dimBlock.y);
+  dim3 dimGrid((SIZE + dimBlock.x -1) / dimBlock.x, (SIZE + dimBlock.y -1 )/ dimBlock.y);
 
   cudaBlockKernel<<<dimGrid, dimBlock>>>(Da, Db, Dc, SIZE);
 
@@ -184,6 +180,7 @@ void w_blocking(float*a, float*b, float*c, int N) {
   cudaFree(Da);
   cudaFree(Db);
   cudaFree(Dc);
+  stop();
 }
 
 
@@ -194,12 +191,6 @@ int main(int argc, char *argv[]) {
         printf("Argumentos incorretos\n");
         return -1;
     }
-
-
-    //Inicialização da PAPI
-	retval = PAPI_library_init(PAPI_VER_CURRENT);
-	retval = PAPI_create_eventset(&EventSet);
-	retval = PAPI_add_events(EventSet, Events, NUM_EVENTS);
 
 
     float *matrix_a, *matrix_b, *matrix_c;
@@ -215,22 +206,34 @@ int main(int argc, char *argv[]) {
     matrix_cc = createMatrix(ONLY_ALLOC);
 
 
-	start();
     if(imp == 1) {
-        bo_block(matrix_a, matrix_b, matrix_c);
+        no_block(matrix_a, matrix_b, matrix_c, SIZE);
+		no_block(matrix_a, matrix_b, matrix_cc, SIZE);
     }
     else if(imp == 2) {
-        w_block(matrix_a, matrix_b, matrix_c);
+        w_block(matrix_a, matrix_b, matrix_c, SIZE);
+		w_block(matrix_a, matrix_b, matrix_cc, SIZE);
     }
     else {
         printf("Nenhuma implementação corresponde ao primeiro argumento!!\n");
         return -1;
     }
-	stop();
 
-    printf("/%.9f", values[0]/ (float) values[1]);
+	for(int i = 0; i < SIZE; i++){
+		printf("[");
+		for(int j = 0; j < SIZE; j++) {
+			printf("%.2f ", matrix_c[i*SIZE + j]);
+		}
+		printf("]\n");
+	}
 
-
+	for(int i = 0; i < SIZE; i++){
+		printf("[");
+		for(int j = 0; j < SIZE; j++) {
+			printf("%.2f ", matrix_cc[i*SIZE + j]);
+		}
+		printf("]\n");
+	}
 
     free(matrix_a);
     free(matrix_b);

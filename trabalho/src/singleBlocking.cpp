@@ -1,15 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <papi.h>
 #include <sys/time.h>
 #include <omp.h>
-
-// Variáveis e defines relacionados com a PAPI
-#define             NUM_EVENTS          2
-int	Events[NUM_EVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS};
-int EventSet = PAPI_NULL, retval;
-long long int values[NUM_EVENTS];
 
 
 #define 			RANDOM_GEN 			0
@@ -92,7 +85,6 @@ float * createMatrix(int opt){
 
 void matrixMultIJK(float * __restrict__ matrix_a, float * __restrict__ matrix_b, float * __restrict__ matrix_c){
     start();
-    retval = PAPI_start(EventSet);
     int i, j, k, bi, bj, bk;
 
 	for(bi = 0; bi < SIZE; bi+= BLOCK_SIZE)

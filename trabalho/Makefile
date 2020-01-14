@@ -16,7 +16,7 @@ SOURCE2= $(SOURCE_DIR)/singleBlocking.cpp
 SOURCE3= $(SOURCE_DIR)/cuda.cu
 
 CFLAGS= -O3 -fopt-info-optimized -fopenmp -Wall -Wextra -lm -g -lpapi -flto-report $(PAPI_LIB) $(PAPI_INCLUDE) -lpthread
-CFLAGS2= -g -G -DD_GPU I/share/apps/papi/5.5.0/include -L/share/apps/papi/5.5.0/lib  -lpapi
+CFLAGS2= -g -G -DD_GPU
 
 MKDIR= mkdir -p
 
